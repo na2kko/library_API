@@ -45,11 +45,17 @@ jobs:
 
       - run: composer install --no-progress --prefer-dist --optimize-autoloader
 
+      - run: php artisan config:clear
+
       - run: |
           mkdir -p database
           touch database/database.sqlite
 
       - run: php artisan migrate --force
+
+      - env:
+        DB_CONNECTION: sqlite
+        DB_DATABASE: database/database.sqlite
 
       - name: Build Assets
         run: npm run build
