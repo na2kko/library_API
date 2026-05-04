@@ -45,7 +45,9 @@ jobs:
 
       - run: composer install --no-progress --prefer-dist --optimize-autoloader
 
-      - run: php artisan key:generate
+      - run: |
+          mkdir -p database
+          touch database/database.sqlite
 
       - run: php artisan migrate --force
 
