@@ -53,15 +53,13 @@ jobs:
 
       - run: php artisan migrate --force
 
-      - name: Run tests
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: database/database.sqlite
-
       - name: Build Assets
         run: npm run build
 
       - name: Run tests
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
         run: php artisan test
 
   security:
