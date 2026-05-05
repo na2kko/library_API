@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+# --- DATABASE SERVICE (MYSQL) ---
+  mysql:
+    image: mysql:8.4
+    container_name: library-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - library-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "pinng", "-h", "localhost", "-uroot", "-p${DB_PASSWORD}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# --- API SERVICE (PHP) ---
+  app:
+    build: 
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: library-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - library-network
+
+# --- WEB SERVER SERVICE (NGINX) ---
+  nginx:
+    build: 
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    container_name: library-nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - app
+    networks:
+      - library-network
+
+networks:
+  library-network:
+    driver: bridge
+
+volumes:
+  db_data: {}
