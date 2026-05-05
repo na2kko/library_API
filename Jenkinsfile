@@ -10,12 +10,6 @@ pipeline {
 
   stages {
 
-    stage("checkout") {
-      steps {
-        checkout scm
-      }
-    }
-
     stage("setup") {
       steps {
         sh 'cp .env.example .env'
@@ -24,6 +18,9 @@ pipeline {
         sh 'php artisan key:generate'
       }
       post {
+        failure {
+            echo 'El SetUp falló.'
+        }
         success {
           echo 'SetUp completado de manera correcta.'
         }
