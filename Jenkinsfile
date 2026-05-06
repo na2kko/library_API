@@ -72,6 +72,22 @@ pipeline {
         }
       }
     }
+
+    stage("Deploy to Develop") {
+      when {
+        branch 'develop'
+      }
+      steps {
+        script {
+          echo 'Iniciando el despliegue automático...'
+          sh 'docker-compose up -d --build'
+
+          sh 'docker exec library-app php artisan config:cache'
+          sh 'docker exec library-app php artisan route:cache'
+          sh 'docker exec library-app php artisan view:cache'
+        }
+      }
+    }
   }
 
   post {
