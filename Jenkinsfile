@@ -3,8 +3,12 @@ pipeline {
   agent any
 
   environment {
-    DB_CONNECTION = 'sqlite'
-    DB_DATABASE = 'database/database.sqlite'
+    DB_CONNECTION=mysql
+    DB_HOST=library-db
+    DB_PORT=3306
+    DB_DATABASE=laravel
+    DB_USERNAME=test-user
+    DB_PASSWORD=test-password
     APP_ENV = 'testing'
   }
 
@@ -13,9 +17,10 @@ pipeline {
     stage("setup") {
       steps {
         sh 'cp .env.example .env'
-        sh 'composer install --no-interaction --prefer-dist --optimize-autoloader'
-        sh 'npm install'
-        sh 'php artisan key:generate'
+        sh 'docker-compose up -d mysql'
+        sh 'docker-compose run --rm app composer install --no-interaction --prefer-dist --optimize-autoloader'
+        sh 'docker-compose run --rm app npm install'
+        sh 'docker-compose run --rm app php artisan key:generate'
       }
       post {
         failure {
@@ -29,7 +34,7 @@ pipeline {
 
     stage("lint") {
       steps {
-        sh './vendor/bin/pint --test'
+        sh 'docker-compose run --rm app ./vendor/bin/pint --test'
       }
       post {
         failure {
@@ -43,11 +48,9 @@ pipeline {
 
     stage("test") {
       steps {
-        sh 'mkdir -p database'
-        sh 'touch database/database.sqlite'
-        sh 'php artisan migrate --force'
-        sh 'npm run build'
-        sh 'php artisan test'
+        sh 'docker-compose run --rm app php artisan migrate:fresh --force'
+        sh 'docker-compose run --rm app npm run build'
+        sh 'docker-compose run --rm app php artisan test'
       }
       post {
         failure {
@@ -61,7 +64,7 @@ pipeline {
 
     stage("security") {
       steps {
-        sh 'composer audit'
+        sh 'docker-compose run --rm app composer audit'
       }
       post {
         failure {
