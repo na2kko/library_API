@@ -1,4 +1,4 @@
-FROM php:8.5.6RC1-alpine3.22
+FROM php:8.4-fpm-alpine
 
 RUN apk add --no-cache \
     nodejs \
@@ -19,18 +19,22 @@ COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 WORKDIR /usr/src/library-api
 
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-scripts --no-autoloader
+RUN composer install --no-dev --no-scripts --no-autoloader
 
 COPY package.json package-lock.json ./
 RUN npm install
 
 COPY . .
 
-RUN composer dump-autoloader --no-dev --optimize
+RUN composer dump-autoload --no-dev --optimize
 RUN npm run build
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE 9000
 
-CMD ["php-fpm"]
+COPY docker/php/entrypoint.sh /usr/local/bin
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT [ "entrypoint.sh" ]
+CMD ["/usr/local/sbin/php-fpm"]
