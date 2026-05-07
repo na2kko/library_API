@@ -7,7 +7,7 @@ pipeline {
     stage("lint") {
       steps {
         sh '''
-          docker compose -f docker-compose.ci.yml build -quiet app-test
+          docker compose -f docker-compose.ci.yml build app-test
 
           docker compose -f docker-compose.ci.yml run --rm app-test \
           php ./vendor/bin/pint --test
