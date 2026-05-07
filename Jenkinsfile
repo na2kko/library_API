@@ -2,15 +2,26 @@ pipeline {
   
   agent any
 
+  environment {
+    CI_PROJECT = "library-ci"
+    PROD_PROJECT = "library-prod"
+  }
+
   stages {
 
     stage("lint") {
       steps {
         sh '''
-          docker compose -f docker-compose.ci.yml build app-test
+          docker compose \
+            -p $CI_PROJECT \
+            -f docker-compose.ci.yml \
+            build app-test
 
-          docker compose -f docker-compose.ci.yml run --rm app-test \
-          php ./vendor/bin/pint --test
+          docker compose \
+            -p $CI_PROJECT \
+            -f docker-compose.ci.yml \
+            run --rm app-test \
+            php ./vendor/bin/pint --test
         '''
       }
       post {
@@ -20,18 +31,29 @@ pipeline {
         success {
           echo 'La prueba de estilos del código fue completada de manera correcta.'
         }
+        always {
+          sh '''
+            docker compose \
+              -p $CI_PROJECT \
+              -f docker-compose.ci.yml \
+              down -v || true
+          '''
+        }
       }
     }
 
     stage("test") {
       steps {
         sh '''
-          docker compose -f docker-compose.ci.yml run --rm app-test \
-          sh -c "
-            touch /tmp/testing.sqlite &&
-            php artisan migrate:fresh --force &&
-            php artisan test
-          "
+          docker compose \
+            -p $CI_PROJECT \
+            -f docker-compose.ci.yml \
+            run --rm app-test \
+            sh -c "
+              touch /tmp/testing.sqlite &&
+              php artisan migrate:fresh --force &&
+              php artisan test
+            "
         '''
       }
       post {
@@ -41,14 +63,25 @@ pipeline {
         success {
           echo 'Las pruebas de código fueron completadas de manera correcta.'
         }
+        always {
+          sh '''
+            docker compose \
+              -p $CI_PROJECT \
+              -f docker-compose.ci.yml \
+              down -v || true
+          '''
+        }
       }
     }
 
     stage("security") {
       steps {
         sh '''
-          docker compose -f docker-compose.ci.yml run --rm app-test \
-          composer audit
+          docker compose \
+            -p $CI_PROJECT \
+            -f docker-compose.ci.yml \
+            run --rm app-test \
+            composer audit
         '''
       }
       post {
@@ -57,6 +90,14 @@ pipeline {
         }
         success {
           echo 'Las pruebas de seguridad fueron completadas de manera correcta.'
+        }
+        always {
+          sh '''
+            docker compose \
+              -p $CI_PROJECT \
+              -f docker-compose.ci.yml \
+              down -v || true
+          '''
         }
       }
     }
@@ -68,30 +109,33 @@ pipeline {
       steps {
         script {
           sh '''
-          docker compose up -d --build
-        '''
+            docker compose \
+              -p $PROD_PROJECT \
+              up -d --build
+          '''
 
-        sh '''
-          docker compose exec app php artisan migrate --force
-        '''
+          sh '''
+            docker compose \
+              -p $PROD_PROJECT \
+              exec -T app \
+              php artisan migrate --force
+          '''
 
-        sh '''
-          docker compose exec app php artisan config:cache
-        '''
+          sh '''
+            docker compose \
+              -p $PROD_PROJECT \
+              exec -T app \
+              php artisan config:cache
+          '''
 
-        sh '''
-          docker compose exec app php artisan route:cache
-        '''
-        }
+          sh '''
+            docker compose \
+              -p $PROD_PROJECT \
+              exec -T app \
+              php artisan route:cache
+          '''
       }
       post {
-        always {
-          sh '''
-            docker compose -f docker-compose.ci.yml down -v --remove-orphans || true
-          '''
-          sh 'docker compose -f docker-compose.ci.yml down -v || true'
-        }
-
         success {
           echo 'Pipeline completada correctamente.'
         }
@@ -100,6 +144,16 @@ pipeline {
           echo 'La pipeline falló.'
         }
       }
+    }
+  }
+  post {
+    always {
+      sh '''
+        docker image prune -f || true
+      '''
+      sh '''
+        docker builder prune -f || true
+      '''
     }
   }
 }
