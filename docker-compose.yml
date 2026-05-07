@@ -36,16 +36,13 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
-
+      
 # --- API SERVICE (PHP) ---
   app:
-    environment:
-      - APP_KEY=base64:TB1M856sj05rDB9xf51ptWL03l7XQ4lvkuIQDbWkH54=
-      - APP_ENV=local
-      - APP_DEBUG=true
     build: 
       context: .
       dockerfile: docker/php/Dockerfile
+      target: production
     container_name: library-app
     env_file:
       - .env

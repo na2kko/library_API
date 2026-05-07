@@ -2,47 +2,16 @@ pipeline {
   
   agent any
 
-  environment {
-    // DB_CONNECTION='mysql'
-    // DB_HOST='library-db'
-    // DB_PORT='3306'
-    // DB_DATABASE='laravel'
-    // DB_USERNAME='test-user'
-    // DB_PASSWORD='test-password'
-    APP_ENV = 'testing'
-    APP_DEBUG      = 'true'
-    SESSION_DRIVER = 'array'
-    BCRYPT_ROUNDS  = '4'
-    CACHE_STORE    = 'array'
-    QUEUE_CONNECTION = 'sync'
-    MAIL_MAILER    = 'array'
-  }
-
   stages {
-
-    stage("setup") {
-      steps {
-        sh 'cp .env.example .env'
-        sh 'docker compose up -d mysql'
-        sh 'docker compose build --no-cache app'
-        sh 'docker compose run --rm app composer install --no-interaction --prefer-dist --optimize-autoloader'
-        sh 'docker compose run --rm app npm install'
-        sh 'docker compose run --rm app php artisan key:generate'
-        sh 'docker compose run --rm app chmod -R 777 storage bootstrap/cache'
-      }
-      post {
-        failure {
-            echo 'El SetUp falló.'
-        }
-        success {
-          echo 'SetUp completado de manera correcta.'
-        }
-      }
-    }
 
     stage("lint") {
       steps {
-        sh 'docker compose run --rm app php ./vendor/bin/pint --test'
+        sh '''
+          docker compose -f docker-compose.ci.yml build app-test
+
+          docker compose -f docker-compose.ci.yml run --rm app-test \
+          php ./vendor/bin/pint --test
+        '''
       }
       post {
         failure {
@@ -56,10 +25,10 @@ pipeline {
 
     stage("test") {
       steps {
-        sh "sed -i 's/APP_ENV=.*/APP_ENV=testing/' .env"
-        sh 'docker compose run --rm app php artisan optimize:clear'
-        sh 'docker compose run --rm app npm run build'
-        sh 'docker compose run --rm app php artisan test'
+        sh '''
+          docker compose -f docker-compose.ci.yml run --rm app-test \
+          php artisan test
+        '''
       }
       post {
         failure {
@@ -73,7 +42,10 @@ pipeline {
 
     stage("security") {
       steps {
-        sh 'docker compose run --rm app composer audit'
+        sh '''
+          docker compose -f docker-compose.ci.yml run --rm app-test \
+          composer audit
+        '''
       }
       post {
         failure {
@@ -91,24 +63,40 @@ pipeline {
       }
       steps {
         script {
-          echo 'Iniciando el despliegue automático...'
-          sh 'docker compose up -d --build'
+          sh '''
+          docker compose up -d --build
+        '''
 
-          sh 'docker exec library-app php artisan config:cache'
-          sh 'docker exec library-app php artisan route:cache'
-          sh 'docker exec library-app php artisan view:cache'
+        sh '''
+          docker compose exec app php artisan migrate --force
+        '''
+
+        sh '''
+          docker compose exec app php artisan config:cache
+        '''
+
+        sh '''
+          docker compose exec app php artisan route:cache
+        '''
+
+        sh '''
+          docker compose exec app php artisan view:cache
+        '''
+        }
+      }
+      post {
+        always {
+          sh 'docker compose -f docker-compose.ci.yml down -v || true'
+        }
+
+        success {
+          echo 'Pipeline completada correctamente.'
+        }
+
+        failure {
+          echo 'La pipeline falló.'
         }
       }
     }
   }
-
-  post {
-    always {
-      sh 'rm -f database/database.sqlite'
-    }
-    success {
-      echo 'La pipeline ha sido completada de manera correcta =)'
-    }
-  }
-  
 }
