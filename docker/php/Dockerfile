@@ -9,7 +9,8 @@ RUN apk add --no-cache \
     libwebp-dev \
     libzip-dev \
     zip \
-    unzip
+    unzip \
+    openssl
 
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
 RUN docker-php-ext-install pdo pdo_mysql bcmath gd zip

@@ -3,12 +3,12 @@ pipeline {
   agent any
 
   environment {
-    DB_CONNECTION='mysql'
-    DB_HOST='library-db'
-    DB_PORT='3306'
-    DB_DATABASE='laravel'
-    DB_USERNAME='test-user'
-    DB_PASSWORD='test-password'
+    // DB_CONNECTION='mysql'
+    // DB_HOST='library-db'
+    // DB_PORT='3306'
+    // DB_DATABASE='laravel'
+    // DB_USERNAME='test-user'
+    // DB_PASSWORD='test-password'
     APP_ENV = 'testing'
     APP_DEBUG      = 'true'
     SESSION_DRIVER = 'array'
