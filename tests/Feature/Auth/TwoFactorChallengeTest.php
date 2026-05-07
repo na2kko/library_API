@@ -15,7 +15,7 @@ test('two factor challenge redirects to login when not authenticated', function 
 
 test('two factor challenge can be rendered', function () {
     $this->withoutMiddleware();
-    
+
     Features::twoFactorAuthentication([
         'confirm' => true,
         'confirmPassword' => true,
