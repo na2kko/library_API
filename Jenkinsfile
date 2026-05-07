@@ -27,7 +27,11 @@ pipeline {
       steps {
         sh '''
           docker compose -f docker-compose.ci.yml run --rm app-test \
-          php artisan test
+          sh -c "
+            touch /tmp/testing.sqlite &&
+            php artisan migrate:fresh --force &&
+            php artisan test
+          "
         '''
       }
       post {
@@ -86,6 +90,9 @@ pipeline {
       }
       post {
         always {
+          sh '''
+            docker compose -f docker-compose.ci.yml down -v --remove-orphans || true
+          '''
           sh 'docker compose -f docker-compose.ci.yml down -v || true'
         }
 
