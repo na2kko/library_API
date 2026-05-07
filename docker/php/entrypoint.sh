@@ -2,9 +2,8 @@
 
 set -e
 
-if ["$1" = "php-fpm"]; then
-    echo "corriendo migraciones..."
-    php artisan migrate --force
+if [-d "storage"]; then
+    chown -R www-data:www-data storage bootstrap/cache
 fi
 
 exec "$@"

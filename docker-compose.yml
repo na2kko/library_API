@@ -46,8 +46,6 @@ services:
     build: 
       context: .
       dockerfile: docker/php/Dockerfile
-    volumes:
-      - .:/usr/src/library-api
     container_name: library-app
     env_file:
       - .env
