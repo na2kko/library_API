@@ -61,6 +61,8 @@ pipeline {
       sh "sed -i 's/MAIL_MAILER=.*/MAIL_MAILER=array/' .env"
         sh 'docker compose run --rm app php artisan config:clear'
         sh 'docker compose run --rm app php artisan cache:clear'
+        sh 'docker compose run --rm app php artisan config:cache --env=testing'
+        sh 'docker compose run --rm app php artisan config:clean --env=testing'
         sh 'docker compose run --rm app php artisan migrate:fresh --force'
         sh 'docker compose run --rm app npm run build'
         sh 'docker compose run --rm app php ./vendor/bin/pest'
