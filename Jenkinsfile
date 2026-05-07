@@ -24,7 +24,7 @@ pipeline {
       steps {
         sh 'cp .env.example .env'
         sh 'docker compose up -d mysql'
-        sh 'docker compose build --quiet app'
+        sh 'docker compose build --no-cache app'
         sh 'docker compose run --rm app composer install --no-interaction --prefer-dist --optimize-autoloader'
         sh 'docker compose run --rm app npm install'
         sh 'docker compose run --rm app php artisan key:generate'
@@ -58,7 +58,6 @@ pipeline {
       steps {
         sh "sed -i 's/APP_ENV=.*/APP_ENV=testing/' .env"
         sh 'docker compose run --rm app php artisan optimize:clear'
-        sh 'docker compose run --rm app php artisan migrate:fresh --force'
         sh 'docker compose run --rm app npm run build'
         sh 'docker compose run --rm app php artisan test'
       }

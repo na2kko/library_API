@@ -14,6 +14,7 @@ RUN apk add --no-cache \
 
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp
 RUN docker-php-ext-install pdo pdo_mysql bcmath gd zip
+RUN docker-php-ext-install pdo pdo_mysql pdo_sqlite sqlite3 bcmath gd zip
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
