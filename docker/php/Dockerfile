@@ -36,13 +36,17 @@ FROM base AS testing
 
 COPY composer.json composer.lock ./
 
-RUN composer install
+RUN composer install --no-scripts --no-interaction --prefer-dist
 
 COPY package.json package-lock.json ./
 
 RUN npm install
 
 COPY . .
+
+RUN composer dump-autoload --optimize
+
+RUN php artisan package:discover
 
 RUN npm run build
 
@@ -53,18 +57,26 @@ CMD ["php", "artisan", "test"]
 # =========================
 FROM base AS production
 
+WORKDIR /usr/src/library-api
+
 COPY composer.json composer.lock ./
 
 RUN composer install \
     --no-dev \
+    --no-scripts \
     --optimize-autoloader \
-    --no-interaction
+    --no-interaction \
+    --prefer-dist
 
 COPY package.json package-lock.json ./
 
 RUN npm install
 
 COPY . .
+
+RUN composer dump-autoload --optimize
+
+RUN php artisan package:discover --ansi
 
 RUN npm run build
 
