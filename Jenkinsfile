@@ -17,10 +17,10 @@ pipeline {
     stage("setup") {
       steps {
         sh 'cp .env.example .env'
-        sh 'docker-compose up -d mysql'
-        sh 'docker-compose run --rm app composer install --no-interaction --prefer-dist --optimize-autoloader'
-        sh 'docker-compose run --rm app npm install'
-        sh 'docker-compose run --rm app php artisan key:generate'
+        sh 'docker compose up -d mysql'
+        sh 'docker compose run --rm app composer install --no-interaction --prefer-dist --optimize-autoloader'
+        sh 'docker compose run --rm app npm install'
+        sh 'docker compose run --rm app php artisan key:generate'
       }
       post {
         failure {
@@ -34,7 +34,7 @@ pipeline {
 
     stage("lint") {
       steps {
-        sh 'docker-compose run --rm app ./vendor/bin/pint --test'
+        sh 'docker compose run --rm app ./vendor/bin/pint --test'
       }
       post {
         failure {
@@ -48,9 +48,9 @@ pipeline {
 
     stage("test") {
       steps {
-        sh 'docker-compose run --rm app php artisan migrate:fresh --force'
-        sh 'docker-compose run --rm app npm run build'
-        sh 'docker-compose run --rm app php artisan test'
+        sh 'docker compose run --rm app php artisan migrate:fresh --force'
+        sh 'docker compose run --rm app npm run build'
+        sh 'docker compose run --rm app php artisan test'
       }
       post {
         failure {
@@ -64,7 +64,7 @@ pipeline {
 
     stage("security") {
       steps {
-        sh 'docker-compose run --rm app composer audit'
+        sh 'docker compose run --rm app composer audit'
       }
       post {
         failure {
@@ -83,7 +83,7 @@ pipeline {
       steps {
         script {
           echo 'Iniciando el despliegue automático...'
-          sh 'docker-compose up -d --build'
+          sh 'docker compose up -d --build'
 
           sh 'docker exec library-app php artisan config:cache'
           sh 'docker exec library-app php artisan route:cache'
