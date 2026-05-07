@@ -47,6 +47,9 @@ services:
       context: .
       dockerfile: docker/php/Dockerfile
     container_name: library-app
+    volumes:
+      - vendor_data:/usr/src/library-api/vendor
+      - node_modules_data:/usr/src/library-api/node_modules
     env_file:
       - .env
     restart: unless-stopped
@@ -77,3 +80,6 @@ networks:
 volumes:
   db_data: {}
   jenkins_home: {}
+  vendor_data: {}
+  node_modules_data: {}
+  

@@ -2,7 +2,7 @@
 
 set -e
 
-if [-d "storage"]; then
+if [ -d "storage" ]; then
     chown -R www-data:www-data storage bootstrap/cache
 fi
 
