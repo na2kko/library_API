@@ -18,7 +18,7 @@ pipeline {
       steps {
         sh 'cp .env.example .env'
         sh 'docker compose up -d mysql'
-        sh 'docker compose build --quite app'
+        sh 'docker compose build --quiet app'
         sh 'docker compose run --rm app composer install --no-interaction --prefer-dist --optimize-autoloader'
         sh 'docker compose run --rm app npm install'
         sh 'docker compose run --rm app php artisan key:generate'
