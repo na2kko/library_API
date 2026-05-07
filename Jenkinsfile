@@ -82,10 +82,6 @@ pipeline {
         sh '''
           docker compose exec app php artisan route:cache
         '''
-
-        sh '''
-          docker compose exec app php artisan view:cache
-        '''
         }
       }
       post {
