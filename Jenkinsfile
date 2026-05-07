@@ -112,20 +112,20 @@ pipeline {
       }
       steps {
         withCredentials([file(credentialsId: '.env.prod', variable: 'ENV_FILE')]) {
-          script {
-            sh '''
-              docker compose \
-                -p $PROD_PROJECT \
-                up -d --build
-            '''
+          sh '''
+            cp $ENV_FILE .env
 
-            sh '''
-              docker compose \
-                -p $PROD_PROJECT \
-                exec -T app \
-                php artisan migrate --force
-            '''
-          }
+            docker compose \
+              -p $PROD_PROJECT \
+              up -d --build
+          '''
+
+          sh '''
+            docker compose \
+              -p $PROD_PROJECT \
+              exec -T app \
+              php artisan migrate --force
+          '''
         }
       }
       post {
