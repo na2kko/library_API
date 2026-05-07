@@ -10,6 +10,12 @@ pipeline {
     DB_USERNAME='test-user'
     DB_PASSWORD='test-password'
     APP_ENV = 'testing'
+    APP_DEBUG      = 'true'
+    SESSION_DRIVER = 'array'
+    BCRYPT_ROUNDS  = '4'
+    CACHE_STORE    = 'array'
+    QUEUE_CONNECTION = 'sync'
+    MAIL_MAILER    = 'array'
   }
 
   stages {
