@@ -1,22 +1,5 @@
 services:
 # --- DATABASE SERVICE (MYSQL) ---
-
-  jenkins:
-    build:
-      context: .
-      dockerfile: docker/jenkins/Dockerfile
-    container_name: jenkins
-    user: root
-    ports:
-      - "9090:8080"
-      - "50000:50000"
-    volumes: 
-      - /var/run/docker.sock:/var/run/docker.sock
-      - jenkins_home:/var/jenkins_home
-    networks:
-      - library-network
-    
-
   mysql:
     image: mysql:8.4
     container_name: library-db
@@ -36,7 +19,7 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
-      
+
 # --- API SERVICE (PHP) ---
   app:
     build: 
