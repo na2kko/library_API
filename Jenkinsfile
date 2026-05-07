@@ -134,8 +134,13 @@ pipeline {
               exec -T app \
               php artisan route:cache
           '''
+        }
       }
       post {
+        always {
+          sh 'docker image prune -f || true'
+          sh 'docker builder prune -f || true'
+        }
         success {
           echo 'Pipeline completada correctamente.'
         }
@@ -144,16 +149,6 @@ pipeline {
           echo 'La pipeline falló.'
         }
       }
-    }
-  }
-  post {
-    always {
-      sh '''
-        docker image prune -f || true
-      '''
-      sh '''
-        docker builder prune -f || true
-      '''
     }
   }
 }
