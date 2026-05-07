@@ -1,7 +1,10 @@
 #!/bin/sh
 
-chown -R www-data:www-data storage bootstrap/cache
+set -e
 
-php artisan migrate --force
+if ["$1" = "php-fpm"]; then
+    echo "corriendo migraciones..."
+    php artisan migrate --force
+fi
 
 exec "$@"

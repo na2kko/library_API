@@ -34,7 +34,7 @@ pipeline {
 
     stage("lint") {
       steps {
-        sh 'docker compose run --rm app ./vendor/bin/pint --test'
+        sh 'docker compose run --rm app php ./vendor/bin/pint --test'
       }
       post {
         failure {
