@@ -16,6 +16,8 @@ test('reset password link screen can be rendered', function () {
 });
 
 test('reset password link can be requested', function () {
+    $this->withoutMiddleware();
+
     Notification::fake();
 
     $user = User::factory()->create();
@@ -26,6 +28,8 @@ test('reset password link can be requested', function () {
 });
 
 test('reset password screen can be rendered', function () {
+    $this->withoutMiddleware();
+
     Notification::fake();
 
     $user = User::factory()->create();
@@ -42,6 +46,8 @@ test('reset password screen can be rendered', function () {
 });
 
 test('password can be reset with valid token', function () {
+    $this->withoutMiddleware();
+    
     Notification::fake();
 
     $user = User::factory()->create();
