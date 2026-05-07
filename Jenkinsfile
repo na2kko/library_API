@@ -55,6 +55,7 @@ pipeline {
 
     stage("test") {
       steps {
+        sh 'docker compose run --rm app php artisan config:clear'
         sh 'docker compose run --rm app php artisan migrate:fresh --force'
         sh 'docker compose run --rm app npm run build'
         sh 'docker compose run --rm app php ./vendor/bin/pest'
