@@ -56,11 +56,14 @@ pipeline {
 
     stage("test") {
       steps {
+        sh "sed -i 's/SESSION_DRIVER=.*/SESSION_DRIVER=array/' .env"
+      sh "sed -i 's/QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env"
+      sh "sed -i 's/MAIL_MAILER=.*/MAIL_MAILER=array/' .env"
         sh 'docker compose run --rm app php artisan config:clear'
         sh 'docker compose run --rm app php artisan cache:clear'
         sh 'docker compose run --rm app php artisan migrate:fresh --force'
         sh 'docker compose run --rm app npm run build'
-        sh 'docker compose run --rm -e SESSION_DRIVER=array -e QUEUE_CONNECTION=sync -e MAIL_MAILER=array app php ./vendor/bin/pest'
+        sh 'docker compose run --rm app php ./vendor/bin/pest'
       }
       post {
         failure {
