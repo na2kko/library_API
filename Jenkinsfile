@@ -28,6 +28,7 @@ pipeline {
         sh 'docker compose run --rm app composer install --no-interaction --prefer-dist --optimize-autoloader'
         sh 'docker compose run --rm app npm install'
         sh 'docker compose run --rm app php artisan key:generate'
+        sh 'docker compose run --rm app chmod -R 777 storage bootstrap/cache'
       }
       post {
         failure {
@@ -56,9 +57,10 @@ pipeline {
     stage("test") {
       steps {
         sh 'docker compose run --rm app php artisan config:clear'
+        sh 'docker compose run --rm app php artisan cache:clear'
         sh 'docker compose run --rm app php artisan migrate:fresh --force'
         sh 'docker compose run --rm app npm run build'
-        sh 'docker compose run --rm app php ./vendor/bin/pest'
+        sh 'docker compose run --rm -e SESSION_DRIVER=array -e QUEUE_CONNECTION=sync -e MAIL_MAILER=array app php ./vendor/bin/pest'
       }
       post {
         failure {
