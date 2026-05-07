@@ -8,6 +8,7 @@ services:
 
     environment:
       - APP_ENV=testing
+      - App_key=base64:BGvVfmL7O+KmS98TqaMyN1xSomfyYgbbyS43OOWiOqw=
       - APP_DEBUG=true
       - DB_CONNECTION=sqlite
       - DB_DATABASE=/tmp/testing.sqlite
