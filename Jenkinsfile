@@ -120,20 +120,6 @@ pipeline {
               exec -T app \
               php artisan migrate --force
           '''
-
-          sh '''
-            docker compose \
-              -p $PROD_PROJECT \
-              exec -T app \
-              php artisan config:cache
-          '''
-
-          sh '''
-            docker compose \
-              -p $PROD_PROJECT \
-              exec -T app \
-              php artisan route:cache
-          '''
         }
       }
       post {
