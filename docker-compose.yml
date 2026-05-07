@@ -30,6 +30,8 @@ services:
     env_file:
       - .env
     restart: unless-stopped
+    volumes:
+      - ./.env:/usr/src/library-api/.env
     depends_on:
       mysql:
         condition: service_healthy

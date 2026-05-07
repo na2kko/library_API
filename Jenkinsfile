@@ -2,6 +2,10 @@ pipeline {
   
   agent any
 
+  options {
+    skipDefaultCheckout(false)
+  }
+
   environment {
     CI_PROJECT = "library-ci"
     PROD_PROJECT = "library-prod"
