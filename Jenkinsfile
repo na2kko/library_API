@@ -111,19 +111,21 @@ pipeline {
         branch 'develop'
       }
       steps {
-        script {
-          sh '''
-            docker compose \
-              -p $PROD_PROJECT \
-              up -d --build
-          '''
+        withCredentials([file(credentialsId: '.env.prod', variable: 'ENV_FILE')]) {
+          script {
+            sh '''
+              docker compose \
+                -p $PROD_PROJECT \
+                up -d --build
+            '''
 
-          sh '''
-            docker compose \
-              -p $PROD_PROJECT \
-              exec -T app \
-              php artisan migrate --force
-          '''
+            sh '''
+              docker compose \
+                -p $PROD_PROJECT \
+                exec -T app \
+                php artisan migrate --force
+            '''
+          }
         }
       }
       post {
