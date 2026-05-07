@@ -49,6 +49,8 @@ pipeline {
     stage("test") {
       steps {
         sh '''
+          cp .env.testing .env
+
           docker compose \
             -p $CI_PROJECT \
             -f docker-compose.ci.yml \
